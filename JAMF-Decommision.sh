@@ -68,7 +68,7 @@ fi
 dialogApp="/usr/local/bin/dialog"
 welcomeCommandFile=$( mktemp /var/tmp/dialogWelcome.XXX )
 setupYourMacCommandFile=$( mktemp /var/tmp/dialogSetupYourMac.XXX )
-setupYourMacPolicyArrayIconPrefixUrl="https://euc-eme-002.abb.com:8443/icon?id="
+setupYourMacPolicyArrayIconPrefixUrl="https://URL:8443/icon?id="
 failureCommandFile=$( mktemp /var/tmp/dialogFailure.XXX )
 jamfBinary="/usr/local/bin/jamf"
 loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ { print $3 }' )
