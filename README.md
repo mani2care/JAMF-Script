@@ -1,6 +1,4 @@
-# JAMF-Script
-MACOS scripts
-JAMF-Decommision.sh
+#JAMF-Decommision.sh
 
 you may need to change following in order to work.
 
