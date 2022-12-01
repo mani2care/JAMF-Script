@@ -1,4 +1,4 @@
-#JAMF-Decommision.sh
+JAMF-Decommision
 
 you may need to change following in order to work.
 
