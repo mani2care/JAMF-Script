@@ -1,6 +1,8 @@
 #!/bin/bash
 
-# Installs Rosetta as needed on Apple Silicon Macs.
+# Installs Rosetta will attempt to download the pkg from apple server and install it.
+# Created By : Manikandan @mani2care
+# On : 18-Jan-2023
 
 exitcode=0
 
