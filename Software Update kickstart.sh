@@ -3,7 +3,7 @@
 # This script tested on Monterey, ventura sevices & it may not work some time try again. 
 # Created By : Manikandan @mani2care
 # On : 16-Feb-2023
-# version 2.0
+# Version 2.0
 
 # Validated following 
 ########################################################################################
@@ -31,7 +31,6 @@ fi
 
 # We need to be connected to the internet in order to download updates.
 function Software_update_catalo_test() {
-
 			# Array of servers to test
 			SERVERS=(
 			  gg.apple.com
@@ -49,52 +48,6 @@ function Software_update_catalo_test() {
 			  updates-http.cdn-apple.com
 			  updates.cdn-apple.com
 			)
-
-			# Function to check internet connection
-			check_internet(){
-			  ping -c 1 google.com > /dev/null 2>&1
-			  if [ $? -ne 0 ]; then
-			    return 1
-			  fi
-			  return 0
-			}
-
-			# Function to check network restrictions
-			check_network_restrictions(){
-			  ping -c 1 apple.com > /dev/null 2>&1
-			  if [ $? -ne 0 ]; then
-			    return 1
-			  fi
-			  return 0
-			}
-
-			# Retry ping tests up to 3 times
-			for i in {1..3}; do
-			  # Check internet connection
-			  check_internet
-			  if [ $? -ne 0 ]; then
-			    echo "Error: Internet connection is not available (Attempt $i of 3)"
-			    sleep 5
-			  fi
-
-			  # Check network restrictions
-			  check_network_restrictions
-			  if [ $? -ne 0 ]; then
-			    echo "Error: Network restrictions are blocking the connection (Attempt $i of 3)"
-			    sleep 5
-			    continue
-			  fi
-			  # If both checks pass, break out of loop and continue script
-			  break
-			done
-
-	if [ $i == 3 ]; then
-	  	echo
-	    echo "Error: Network restrictions are blocking the connection"
-	    traceroute apple.com
-	    exit 0
-	  fi
-
 			# Check active network interfaces
 			if ifconfig en0 | grep -q "inet "; then
 			  # Wi-Fi interface is active
@@ -142,8 +95,6 @@ function Software_update_catalo_test() {
 			  IP=$(ifconfig en4 | grep "inet " | awk '{print $2}')
 			  echo "Thunderbolt 3 IP address: $IP"
 			fi
-
-			echo
 			  # Test reachability of each server
 			  for SERVER in "${SERVERS[@]}"; do
 			    ATTEMPTS=1
@@ -163,6 +114,51 @@ function Software_update_catalo_test() {
 			      fi
 			    done
 			  done
+
+			# Function to check internet connection
+			check_internet(){
+			  ping -c 1 google.com > /dev/null 2>&1
+			  if [ $? -ne 0 ]; then
+			    return 1
+			  fi
+			  return 0
+			}
+
+			# Function to check network restrictions
+			check_network_restrictions(){
+			  ping -c 1 apple.com > /dev/null 2>&1
+			  if [ $? -ne 0 ]; then
+			    return 1
+			  fi
+			  return 0
+			}
+
+			# Retry ping tests up to 3 times
+			for i in {1..3}; do
+			  # Check internet connection
+			  check_internet
+			  if [ $? -ne 0 ]; then
+			    echo "Error: Internet connection is not available (Attempt $i of 3)"
+			    sleep 5
+			  fi
+
+			  # Check network restrictions
+			  check_network_restrictions
+			  if [ $? -ne 0 ]; then
+			    echo "Error: Network restrictions are blocking the connection (Attempt $i of 3)"
+			    sleep 5
+			    continue
+			  fi
+			  # If both checks pass, break out of loop and continue script
+			  break
+			done
+
+			if [ $i == 3 ]; then
+			  	echo
+			    echo "Error: Network restrictions are blocking the connection"
+			    traceroute apple.com
+			    exit 0
+			  fi
 }
 Software_update_catalo_test
 echo
@@ -174,7 +170,10 @@ function stop_software_update_daemon(){
 		then
 		    echo "System Integrity Protection is not Enabled"
 		    if sudo launchctl list | grep -i softwareupdated > /dev/null; then
-		    sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.softwareupdated.plist
+		    sudo launchctl unload -w /System/Library/LaunchDaemons/com.apple.softwareupdated.plist > /dev/null
+		    #Core Location daemon
+		    sudo launchctl unload /System/Library/LaunchDaemons/com.apple.locationd.plist > /dev/null
+
 		    echo "Stopped software update daemon."
 		    # Remove software update catalog
 			echo "Removing software update catalog..."
@@ -214,9 +213,12 @@ function enable_location_services_and_set_time_zone(){
 		/usr/sbin/systemsetup -gettimezone
 		#Know the current time zone server
 		/usr/sbin/systemsetup -getnetworktimeserver
-		/usr/bin/sudo kill -HUP "$(pgrep locationd)"
 		/usr/bin/sudo /usr/bin/killall SystemUIServer
+		#Clear DNS cache
+		sudo dscacheutil -flushcache;sudo killall -HUP mDNSResponder
 		ps -ef | /usr/bin/grep 'timed' | /usr/bin/grep -v grep | /usr/bin/awk '{print $2}' | xargs -r kill -9
+		#Reset Location Services:
+		sudo killall -HUP locationd && /usr/bin/sudo kill -HUP "$(pgrep locationd)"
 		echo
 } 
 enable_location_services_and_set_time_zone
@@ -298,6 +300,8 @@ echo
 # Start software update daemon and check for updates
 function stop_software_update_daemon_load(){
     /bin/launchctl load -w /System/Library/LaunchDaemons/com.apple.softwareupdated.plist > /dev/null
+    #Core Location daemon
+    sudo launchctl load /System/Library/LaunchDaemons/com.apple.locationd.plist > /dev/null
     echo "Stopped software update daemon."
 }
 #if you are enabling this fuction then you need to enable the stop_software_update_daemon function 
@@ -314,14 +318,12 @@ function restart_softwareupdate_kickstart(){
 			  echo "JAMF is not recommended to launchctl kickstart mcaos version from 13.3 & your version is : $OS_VERSION"
 			fi
 
-			#Force the update via MDM
-			mdmctl status > /dev/null 2>&1
-			if [ $? -eq 0 ]
-			then
+			if profiles -C -v | grep -q "MDM Profile"; then
+			  echo "Profile exists"
 			  echo "Forcing the software update via mdmclient"
-			  sudo /usr/libexec/mdmclient AvailableOSUpdates > /dev/null
+			  #sudo /usr/libexec/mdmclient AvailableOSUpdates > /dev/null
 			else
-			  echo "MDM not found."
+			  echo "Profile does not exist"
 			fi
 			echo
 			sleep 1
@@ -331,7 +333,9 @@ restart_softwareupdate_kickstart
 function Install_available_update(){
    	sudo /usr/bin/open "/System/Library/CoreServices/Software Update.app"
     echo "Checking the software updates"
-    sudo softwareupdate -l > /dev/null
+    echo
+    sudo softwareupdate -l
+    echo
     # Show the number of updates available and open the Software Update app
     sleep 20
     LastUpdatesAvailable=$(sudo defaults read /Library/Preferences/com.apple.SoftwareUpdate.plist LastUpdatesAvailable)
