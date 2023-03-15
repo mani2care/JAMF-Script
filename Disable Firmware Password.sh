@@ -1,11 +1,23 @@
 #!/bin/bash
 
-# Check if firmware password is enabled
-if /usr/sbin/firmwarepasswd -check | grep -q "Yes"; then
+# Set log file location
+LOGFILE=/var/log/firmwarepasswd.log
+
+# Check firmware password status
+fw_status=$( /usr/sbin/firmwarepasswd -check 2>&1 )
+echo "$(date '+%Y-%m-%d %H:%M:%S') Firmware password status: $fw_status" >> "$LOGFILE"
+
+if [[ $fw_status == *"Yes"* ]]; then
     # Firmware password is enabled, delete it
-    /usr/sbin/firmwarepasswd -delete
-    echo "Firmware password has been disabled."
+    if ! /usr/sbin/firmwarepasswd -delete >> "$LOGFILE" 2>&1; then
+        echo "$(date '+%Y-%m-%d %H:%M:%S') Error: Failed to delete firmware password." >&2
+        exit 1
+    fi
+    echo "$(date '+%Y-%m-%d %H:%M:%S') Firmware password has been successfully deleted." >> "$LOGFILE"
 else
-    # Firmware password is not enabled, do nothing
-    echo "Firmware password is not enabled."
+    # Firmware password is not enabled
+    echo "$(date '+%Y-%m-%d %H:%M:%S') Firmware password is not enabled." >> "$LOGFILE"
 fi
+
+# Log script output
+echo "$(date '+%Y-%m-%d %H:%M:%S'): Firmware password deletion script run" >> "$LOGFILE"
