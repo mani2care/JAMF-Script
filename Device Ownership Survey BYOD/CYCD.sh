@@ -12,6 +12,8 @@
 # $5 API Password ID 
 # $6 is your extension name 
 # $7 is your extension ID
+#eaName=""Device-Type"" #$6 is your extension name define as well 
+#eaID=""43"" #$7 is your extension ID define aswell 
 
 #https://jamfurl:8443/computerExtensionAttributes.html?id=27&o=r
 
