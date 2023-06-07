@@ -5,11 +5,12 @@ login_enabled=$(sudo systemsetup -getremotelogin | awk '{print $3}')
 
 if [ "$login_enabled" == "On" ]; then
     echo "Remote login was enabled hence Disabling it..."
-    #echo "yes" | sudo systemsetup -setremotelogin off
+    echo "yes" | sudo systemsetup -setremotelogin off
     systemsetup -f -setremotelogin off
     sudo launchctl unload -w /System/Library/LaunchDaemons/ssh.plist
-    sudo launchctl stop com.openssh.sshd
+	sudo launchctl stop com.openssh.sshd
     echo "Remote Login has been disabled."
+    sudo launchctl list | grep ssh
 else
     echo "Remote Login is already disabled."
 fi
@@ -46,8 +47,8 @@ agent_process1=$(pgrep -x ARDAgent)
 
 if [ "$login_enabled1" == "Off" ] && [ -z "$agent_process1" ]; then
     echo "Remote Login and Remote Management are disabled."
-    exit 
 else
     echo "Failed to disable status of Remote Login and/or Remote Management"
-    exit 1
 fi
+
+exit
