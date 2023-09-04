@@ -19,7 +19,8 @@
 scriptVersion="1.0.3"
 export PATH=/usr/bin:/bin:/usr/sbin:/sbin
 scriptLog="${4:-"/var/log/org.churchofjesuschrist.log"}"    # Parameter 4: Script Log Location
-approvedAdmins=(root _hiddenLocalAdmin localadmin1)         # Space-delimited list of approved local admins
+approvedAdmins="${5:-"root"}" # Space-delimited list of approved local admins
+#approvedAdmins=(root _hiddenLocalAdmin localadmin1)  
 adminUsers=$( /usr/bin/dscl . -read Groups/admin GroupMembership | /usr/bin/cut -c 18- )
 adminArray=($adminUsers)
 
