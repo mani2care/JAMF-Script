@@ -9,6 +9,32 @@ defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit202
 defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2023" DisableCheckForUpdates -bool YES
 defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2023" DisableTracking -bool YES
 
+#Theam deployment 
+
+# Define folder and file paths
+folder_path=/Users/$loggedInUser/Library/Group\ Containers/7TQL462TU8.com.techsmith.snagit/Snagit\ 2023/Themes
+file_path="$folder_path/ABB.snagtheme"
+source_file=/Users/Shared/ABB.snagtheme
+
+# Check if the folder exists
+if [ -d "$folder_path" ]; then
+    echo "Folder exists."
+else
+    # If the folder does not exist, create it
+    mkdir -p "$folder_path"
+    echo "Folder created."
+fi
+
+# Check if the file exists
+if [ -e "$file_path" ]; then
+    echo "File exists."
+else
+    # If the file does not exist, move it to the folder
+    mv "$source_file" "$file_path"
+    echo "File moved to the folder."
+fi
+
+
 # Fixing the plist permissions
 chown "${loggedInUser}":staff "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2023.plist"
 chmod 600 "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2023.plist"
