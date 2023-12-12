@@ -56,8 +56,16 @@ applicationprocesskill
 
 	# Set permissions
 	echo "Step 3: Setting permissions..."
-	chmod -R 777 "/Users/Shared/TechSmith"
 	chmod a+x "$LicenseKeyFile"
+ 	/bin/chmod -R 777 "/Users/Shared/Snagit"
+	loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+	/bin/chmod -R 775 /Users/$loggedInUser/Library/Group\ Containers/7TQL462TU8.com.techsmith.snagit/Snagit\ 2024/
+
+	#Hide the licence key
+	chflags hidden /Users/Shared/TechSmith/Snagit/LicenseKey 
+
+	#remove the quarantine
+	xattr -dr com.apple.quarantine /Applications/Snagit\ 2024.app 
 
 	echo "Step 3.1: Activation Key has been updated in '$LicenseKeyFile'."
 
@@ -86,9 +94,6 @@ applicationprocesskill
 	# This lets you turn off the analytics tracking
 	defaults write com.TechSmith.Snagit2023.plist DisableTracking -bool YES
 
-
-		loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
-
 		# Default Setting for Snagit - https://support.techsmith.com/hc/en-us/articles/115007344888-Enterprise-Install-Guidelines-for-Snagit-on-MacOS
 		defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2023" RestrictedOutputs -array com.techsmith.shareplugin.Screencast2022 com.techsmith.shareplugin.QuickShare com.techsmith.shareplugin.Screencast com.techsmith.shareplugin.Knowmia com.techsmith.shareplugin.PanoptoPlugin com.techsmith.shareplugin.GoogleDrive com.techsmith.shareplugin.Slack com.techsmith.shareplugin.YouTube com.techsmith.shareplugin.Dropbox com.techsmith.shareplugin.FTP com.techsmith.shareplugin.FileSystem com.techsmith.shareplugin.Email com.techsmith.shareplugin.iWorkPages com.techsmith.shareplugin.iWorkKeynote com.techsmith.shareplugin.Program com.techsmith.shareplugin.iWorkNumbers com.techsmith.shareplugin.Box
 		defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2023" DisableProductLogin -bool YES
@@ -99,7 +104,6 @@ applicationprocesskill
 		# Fixing the plist permissions
 		chown "${loggedInUser}":staff "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2023.plist"
 		chmod 600 "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2023.plist"
-		applicationprocesskill
 
 	exit 0  ## Success
 else
