@@ -1,6 +1,6 @@
 #!/bin/sh
 #your activation key for the version Snagit 2024
-regkey=""
+regkey="your licence key go here"
 if [ -n "$regkey" ]; then
   [[ ! -d "/Users/Shared/TechSmith/Snagit" ]] && /bin/mkdir -p "/Users/Shared/TechSmith/Snagit"
   /bin/echo "$regkey" > "/Users/Shared/TechSmith/Snagit/LicenseKey"
