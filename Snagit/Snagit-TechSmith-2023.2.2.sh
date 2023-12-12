@@ -2,6 +2,8 @@
 #if you are using the dmg or installing directly from online then use this script
 app_name="Snagit 2023"
 app_path="/Applications/Snagit 2023.app" # Define the path to the application
+# Define the desired Activation Key
+Activationkey="your licence key go here "
 
 #sudo tccutil reset All com.techsmith.snagit.capturehelper2023
 #sudo tccutil reset All com.TechSmith.Snagit2023
@@ -35,9 +37,6 @@ applicationprocesskill
 		    echo "Quarantine attribute was not found on $app_path"
 		fi
 
-	# Define the desired Activation Key
-	Activationkey="your licence key go here "
-
 	# Define the path to the LicenseKey file
 	LicenseKeyFile="/Users/Shared/TechSmith/Snagit/LicenseKey"
 
@@ -59,13 +58,10 @@ applicationprocesskill
 	chmod a+x "$LicenseKeyFile"
  	/bin/chmod -R 777 "/Users/Shared/Snagit"
 	loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
-	/bin/chmod -R 775 /Users/$loggedInUser/Library/Group\ Containers/7TQL462TU8.com.techsmith.snagit/Snagit\ 2024/
+	/bin/chmod -R 775 /Users/$loggedInUser/Library/Group\ Containers/7TQL462TU8.com.techsmith.snagit/"$app_name"
 
 	#Hide the licence key
 	chflags hidden /Users/Shared/TechSmith/Snagit/LicenseKey 
-
-	#remove the quarantine
-	xattr -dr com.apple.quarantine /Applications/Snagit\ 2024.app 
 
 	echo "Step 3.1: Activation Key has been updated in '$LicenseKeyFile'."
 
