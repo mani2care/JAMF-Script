@@ -1,5 +1,5 @@
 #!/bin/bash
-
+#if you are using the dmg or installing directly from online then use this script
 app_name="Snagit 2023"
 app_path="/Applications/Snagit 2023.app" # Define the path to the application
 
