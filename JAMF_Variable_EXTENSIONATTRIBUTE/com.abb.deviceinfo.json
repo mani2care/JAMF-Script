@@ -1,0 +1,127 @@
+{
+  "title": "My Script Settings",
+  "description": "Preference Domain: com.abb.deviceinfo, Application: User Info link : https://learn.jamf.com/bundle/jamf-pro-documentation-current/page/Computer_Configuration_Profiles.html",
+  "properties": {
+    "management_id": {
+      "title": "Management ID ",
+      "description": "The management ID $MANAGEMENTID",
+      "property_order": 10,
+      "type": "string"
+    },
+    "computer_name": {
+      "title": "Computer Name",
+      "description": "The computer name $COMPUTERNAME",
+      "property_order": 20,
+      "type": "string"
+    },
+    "site_name": {
+      "title": "Site Name",
+      "description": "The site name $SITENAME",
+      "property_order": 30,
+      "type": "string"
+    },
+    "site_id": {
+      "title": "Site ID",
+      "description": "The site ID $SITEID",
+      "property_order": 40,
+      "type": "string"
+    },
+    "udid": {
+      "title": "UDID",
+      "description": "The UDID $UDID",
+      "property_order": 50,
+      "type": "string"
+    },
+    "serial_number": {
+      "title": "Serial Number",
+      "description": "The serial number $SERIALNUMBER",
+      "property_order": 60,
+      "type": "string"
+    },
+    "username": {
+      "title": "Username",
+      "description": "The username $USERNAME",
+      "property_order": 70,
+      "type": "string"
+    },
+    "full_name": {
+      "title": "Full Name",
+      "description": "The full name $FULLNAME",
+      "property_order": 80,
+      "type": "string"
+    },
+    "real_name": {
+      "title": "Real Name",
+      "description": "The real name $REALNAME",
+      "property_order": 90,
+      "type": "string"
+    },
+    "email": {
+      "title": "Email",
+      "description": "The email address $EMAIL",
+      "property_order": 100,
+      "type": "string",
+      "format": "email"
+    },
+    "phone": {
+      "title": "Phone",
+      "description": "The phone number $PHONE",
+      "property_order": 110,
+      "type": "string"
+    },
+    "position": {
+      "title": "Position",
+      "description": "The position $POSITION",
+      "property_order": 120,
+      "type": "string"
+    },
+    "department_name": {
+      "title": "Department Name",
+      "description": "The department name $DEPARTMENTNAME",
+      "property_order": 130,
+      "type": "string"
+    },
+    "department_id": {
+      "title": "Department ID",
+      "description": "The department ID $DEPARTMENTID",
+      "property_order": 140,
+      "type": "string"
+    },
+    "building_name": {
+      "title": "Building Name",
+      "description": "The building name $BUILDINGNAME",
+      "property_order": 150,
+      "type": "string"
+    },
+    "building_id": {
+      "title": "Building ID",
+      "description": "The building ID $BUILDINGID",
+      "property_order": 160,
+      "type": "string"
+    },
+    "room": {
+      "title": "Room",
+      "description": "The room $ROOM",
+      "property_order": 170,
+      "type": "string"
+    },
+    "mac_address": {
+      "title": "MAC Address",
+      "description": "The MAC address $MACADDRESS",
+      "property_order": 180,
+      "type": "string"
+    },
+    "jssid": {
+      "title": "JSSID",
+      "description": "The JSSID $JSSID",
+      "property_order": 190,
+      "type": "string"
+    },
+    "profile_jssid": {
+      "title": "Profile JSSID",
+      "description": "The profile JSSID $PROFILEJSSID",
+      "property_order": 200,
+      "type": "string"
+    }
+  }
+}
