@@ -6,7 +6,7 @@
 # half-brightness before sleeping. While plugged into the AC adapter, the power management settings for "Charger" 
 # are set to have the computer never sleep, the disk doesn't spin down, the display sleeps after 30 minutes and 
 # the display dims before sleeping.
-# 
+# https://derflounder.wordpress.com/2022/12/26/identifying-mac-laptops-and-desktops-from-the-command-line-by-checking-for-a-built-in-battery/
 # If it's not a laptop (i.e. a desktop), the power management settings are set to have the computer never sleep, 
 # the disk doesn't spin down, the display sleeps after 30 minutes and the display dims before sleeping.
 #
