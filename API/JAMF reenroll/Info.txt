@@ -1,0 +1,18 @@
+Instructions
+
+In order to run this manually through Terminal, download the Individual Components and do the following:
+
+Open Terminal
+Run "sh /path/to/Jamf Self Healing - Manual Run.sh"
+Enter the following when prompted:
+Jamf Pro URL (EG: https://rocketman.jamfcloud.com/)
+Jamf Pro Username (This should be a full administrator)
+Jamf Pro Password
+Computer ID (You can find this by navigating to the computer's inventory record and looking at ?id=3&o=r. In this case, the ID would be "3")
+Note: In most cases, you will be using a full admin account when running this script. However, the Jamf Pro user, at the very least, needs the following permissions:
+
+Computers: Read
+Check-In: Read | Update
+Computer Check-In Settings: Read | Update
+Flush MDM Commands: Checked
+Send Computer Remote Command to Install Package: Checked
