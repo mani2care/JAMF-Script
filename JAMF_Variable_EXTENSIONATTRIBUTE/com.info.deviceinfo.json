@@ -1,6 +1,6 @@
 {
   "title": "My Script Settings",
-  "description": "Preference Domain: com.abb.deviceinfo, Application: User Info link : https://learn.jamf.com/bundle/jamf-pro-documentation-current/page/Computer_Configuration_Profiles.html",
+  "description": "Preference Domain: com.info.deviceinfo, Application: User Info link : https://learn.jamf.com/bundle/jamf-pro-documentation-current/page/Computer_Configuration_Profiles.html",
   "properties": {
     "management_id": {
       "title": "Management ID ",
