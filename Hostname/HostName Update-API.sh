@@ -47,6 +47,7 @@ echo "Attempting to change Hostname"
 			defaults write /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist NetBIOSName "$newcomputerName"
             echo "Read the Netbiosname ""
             defaults read /Library/Preferences/SystemConfiguration/com.apple.smb.server.plist NetBIOSName
+	    /usr/local/bin/jamf setComputerName -name $newcomputerName
         else
 
             echo "Hostname already same as $oldcomputername not required to change exiting."
