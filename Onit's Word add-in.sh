@@ -18,6 +18,20 @@ XML_CONTENT='<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
   </VersionOverrides>
 </OfficeApp>'
 
+# Step 0.1: Delete the existing manifest.xml file if it exists
+delete_manifest_file() {
+    # Step 1: Delete the existing manifest.xml file if it exists
+    if [ -f "$WORD_ADDIN_DIR" ]; then
+        echo "Deleting existing manifest.xml file..."
+        rm -rf "$WORD_ADDIN_DIR"
+    else
+        echo "No existing manifest.xml file found."
+    fi
+}
+
+# Call the function
+delete_manifest_file
+
 # Step 1: Create the wef directory if it doesn't exist
 echo "Checking for the WEF directory..."
 if [ ! -d "$WORD_ADDIN_DIR" ]; then
