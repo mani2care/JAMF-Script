@@ -6,21 +6,24 @@ if [ -n "$regkey" ]; then
   /bin/echo "$regkey" > "/Users/Shared/TechSmith/Snagit/LicenseKey"
 fi
 
-loggedInUser=$( echo "show State:/Users/ConsoleUser" | scutil | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
+# Get the logged-in user
+loggedInUser=$( scutil <<< "show State:/Users/ConsoleUser" | awk '/Name :/ && ! /loginwindow/ { print $3 }' )
 
-# Default Setting for Snagit - https://support.techsmith.com/hc/en-us/articles/115007344888-Enterprise-Install-Guidelines-for-Snagit-on-MacOS
-defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2024" RestrictedOutputs -array com.techsmith.shareplugin.Screencast2022 com.techsmith.shareplugin.QuickShare com.techsmith.shareplugin.Screencast com.techsmith.shareplugin.Knowmia com.techsmith.shareplugin.PanoptoPlugin com.techsmith.shareplugin.GoogleDrive com.techsmith.shareplugin.Slack com.techsmith.shareplugin.YouTube com.techsmith.shareplugin.Dropbox com.techsmith.shareplugin.FTP com.techsmith.shareplugin.FileSystem com.techsmith.shareplugin.Email com.techsmith.shareplugin.iWorkPages com.techsmith.shareplugin.iWorkKeynote com.techsmith.shareplugin.Program com.techsmith.shareplugin.iWorkNumbers com.techsmith.shareplugin.Box
-defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2024" DisableProductLogin -bool YES
-defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2024" HideRegistrationKey -bool YES
-defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2024" DisableCheckForUpdates -bool YES
-defaults write "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2024" DisableTracking -bool YES
+# Use dscl to get the correct home directory for the logged-in user
+home_dir=$(dscl . -read /Users/$loggedInUser NFSHomeDirectory | awk '{print $2}')
 
-#Theam deployment 
+# Default Settings for Snagit
+defaults write "$home_dir/Library/Preferences/com.TechSmith.Snagit2024.plist" RestrictedOutputs -array com.techsmith.shareplugin.MSTeams com.techsmith.shareplugin.Screencast2022 com.techsmith.shareplugin.QuickShare com.techsmith.shareplugin.Screencast com.techsmith.shareplugin.Knowmia com.techsmith.shareplugin.PanoptoPlugin com.techsmith.shareplugin.GoogleDrive com.techsmith.shareplugin.Slack com.techsmith.shareplugin.YouTube com.techsmith.shareplugin.Dropbox com.techsmith.shareplugin.FTP com.techsmith.shareplugin.FileSystem com.techsmith.shareplugin.Email com.techsmith.shareplugin.iWorkPages com.techsmith.shareplugin.iWorkKeynote com.techsmith.shareplugin.Program com.techsmith.shareplugin.iWorkNumbers com.techsmith.shareplugin.Box
+defaults write "$home_dir/Library/Preferences/com.TechSmith.Snagit2024.plist" DisableProductLogin -bool YES
+defaults write "$home_dir/Library/Preferences/com.TechSmith.Snagit2024.plist" HideRegistrationKey -bool YES
+defaults write "$home_dir/Library/Preferences/com.TechSmith.Snagit2024.plist" DisableTracking -bool YES
+
+# Theme Deployment
 
 # Define folder and file paths
-folder_path=/Users/$loggedInUser/Library/Group\ Containers/7TQL462TU8.com.techsmith.snagit/Snagit\ 2024/Themes
+folder_path="$home_dir/Library/Group Containers/7TQL462TU8.com.techsmith.snagit/Snagit 2024/Themes"
 file_path="$folder_path/ABB.snagtheme"
-source_file=/Users/Shared/ABB.snagtheme
+source_file="/Users/Shared/ABB.snagtheme"
 
 # Check if the folder exists
 if [ -d "$folder_path" ]; then
@@ -30,24 +33,33 @@ else
     mkdir -p "$folder_path"
     echo "Folder created."
 fi
-    # If the file does not exist, move it to the folder
-    mv "$source_file" "$file_path"
-    echo "File moved to the folder."
+
+# Move the theme file
+mv "$source_file" "$file_path"
+echo "File moved to the folder."
 
 # Grant the app permission
-/bin/chmod -R 777 "/Users/Shared/Snagit"
-/bin/chmod a+x "/Users/Shared/TechSmith/Snagit/LicenseKey"
-/bin/chmod -R 775 /Users/$loggedInUser/Library/Group\ Containers/7TQL462TU8.com.techsmith.snagit/Snagit\ 2024/
+chmod -R 777 "/Users/Shared/TechSmith"
 
-#Hide the licence key
-chflags hidden /Users/Shared/TechSmith/Snagit/LicenseKey 
+licensePassiveFile="/Users/Shared/TechSmith/Snagit/LicensePassive"
 
-#remove the quarantine
+# Check if LicensePassive file exists
+if [ -f "$licensePassiveFile" ]; then
+    chmod -R 777 "/Users/Shared/TechSmith/Snagit/LicensePassive"
+    # Grant execute permission
+    chmod a+x "$licensePassiveFile"
+    # Hide the file
+    chflags hidden "$licensePassiveFile"
+    echo "LicensePassive file exists. Execute permission granted and file hidden."
+else
+    echo "LicensePassive file not found."
+fi
+
+# Fix permissions for Snagit folder and plist file
+chmod -R 775 "$home_dir/Library/Group Containers/7TQL462TU8.com.techsmith.snagit/Snagit 2024/"
 xattr -dr com.apple.quarantine /Applications/Snagit\ 2024.app 
+chown "$loggedInUser":staff "$home_dir/Library/Preferences/com.TechSmith.Snagit2024.plist"
+chmod 600 "$home_dir/Library/Preferences/com.TechSmith.Snagit2024.plist"
 
-#Fixing the plist permissions
-chown "${loggedInUser}":staff "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2024.plist"
-chmod 600 "/Users/$loggedInUser/Library/Preferences/com.TechSmith.Snagit2024.plist"
-
-exit 0		## Success
-exit 1		## Failure
+exit 0  ## Success
+exit 1  ## Failure
