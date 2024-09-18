@@ -1,0 +1,25 @@
+#!/bin/bash
+
+install_dir=$(/usr/bin/dirname $0)
+sap_gui_installer="$install_dir/SAP GUI for Java Installer.app"
+sap_gui_install_path="/Applications/SAP Clients"
+
+ERROR=0
+
+if [[ -x "$sap_gui_installer" ]]; then
+
+    echo "Attempting to install $sap_gui_install..."
+    "$sap_gui_installer/Contents/MacOS/install" -G --installdir "${sap_gui_install_path}" -J "${install_dir}" --force
+	
+    if [[ $? -ne 0 ]]; then
+	echo "ERROR! Installation of $sap_gui_installer failed"
+	ERROR=1
+    else
+	echo "Successfully installed $sap_gui_installer"
+    fi
+else
+    echo "$sap_gui_installer not found or not executable."
+    ERROR=1
+fi
+
+exit $ERROR
