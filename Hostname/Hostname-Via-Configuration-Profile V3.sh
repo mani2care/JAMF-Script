@@ -3,7 +3,7 @@
 serial=$(ioreg -rd1 -c IOPlatformExpertDevice | awk -F'"' '/IOPlatformSerialNumber/{print $4}')
 
 # Try to get the username using profiles command
-username=$(profiles -P -o stdout | grep -i -A 20 "User Info" | grep "username" | awk -F'=' '{gsub(/^ *| *$/,"",$2); print $2}' | tr -d ';')
+username=$(profiles -P -o stdout | grep -i -A 20 "User Info" | grep "username" | awk -F'=' '{gsub(/^ *| *$/,"",$2); print $2}' | tr -d ';' | tr -d '"')
 
 # If the username is not found, try using the defaults command
 if [ -z "$username" ]; then
