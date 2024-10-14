@@ -20,8 +20,10 @@ apply_mindmanager_23_settings() {
     su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.23 DeviceAutoUpdateDisabled -bool false"
     su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.23 StartupDialogPolicy -int 3"
     su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.23 NewDocumentOnStart -int 1"
-    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.24 ShowCheckForUpdates -int 0"
-    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.24 UpdateCheck -int 86400"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.23 ShowCheckForUpdates -int 0"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.23 UpdateCheck -int 86400"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.23 EnableTracking -bool false"
+	su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.23 EnableCheckForProductNotifications -bool false"
 }
 
 apply_mindmanager_24_settings() {
@@ -35,6 +37,8 @@ apply_mindmanager_24_settings() {
     su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.24 NewDocumentOnStart -int 1"
     su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.24 ShowCheckForUpdates -int 0"
     su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.24 UpdateCheck -int 86400"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.24 EnableTracking -bool false"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.24 EnableCheckForProductNotifications -bool false"
 }
 
 
