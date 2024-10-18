@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+  <key>AutoSelectCertificateForUrls</key>
+    <array>
+      <string>{"pattern":"https://device.login.microsoftonline.com","filter":{"ISSUER":{"CN":"MS-Organization-Access"}}}</string>
+      <string>{"pattern":"https://enterpriseregistration.windows.net","filter":{"ISSUER":{"CN":"MS-Organization-Access"}}}</string>
+    </array>
+    </dict>
+</plist>
