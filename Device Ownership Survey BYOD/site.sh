@@ -3,7 +3,7 @@
 # Check if the username is present in /Library/Managed Preferences/com.abb.deviceinfo.plist
 siteName=$(defaults read "/Library/Managed Preferences/com.abb.deviceinfo.plist" site_name 2>/dev/null)
 
-if [ -n "$username" ]; then
+if [ -n "$siteName" ]; then
     echo "<result>${siteName}</result>"
 else
     # If not found in deviceinfo.plist, check using profiles command
