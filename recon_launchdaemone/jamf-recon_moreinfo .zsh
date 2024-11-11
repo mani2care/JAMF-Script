@@ -3,8 +3,8 @@
 # Purpose: Create a launch daemon and script to update inventory immediately.
 
 # Script parameters from the Jamf Pro policy
-organizationName="abb"
-organizationReverseDomain="com.abbrecon"
+organizationName="org"
+organizationReverseDomain="com.orgrecon"
 
 # Create organization folder if necessary to house the jamf-recon.zsh script
 /bin/mkdir -p "/Library/$organizationName" || {
