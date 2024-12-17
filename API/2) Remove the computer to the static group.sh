@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Fetch parameters from Jamf policy
-#API Role just needs = Update Static Computer Groups and Read Computers.
+# API Role needs = Update Static Computer Groups and Read Computers.
 
 CLIENT_ID="$4"
 CLIENT_SECRET="$5"
@@ -18,18 +18,18 @@ echo "Serial Number: $SERIAL_NUMBER"
 
 # Authenticate and get an access token
 AUTH_RESPONSE=$(curl --location --request POST "$JAMF_URL/api/oauth/token" \
---header 'Content-Type: application/x-www-form-urlencoded' \
---data-urlencode "client_id=$CLIENT_ID" \
---data-urlencode "grant_type=client_credentials" \
---data-urlencode "client_secret=$CLIENT_SECRET" --silent)
+  --header 'Content-Type: application/x-www-form-urlencoded' \
+  --data-urlencode "client_id=$CLIENT_ID" \
+  --data-urlencode "grant_type=client_credentials" \
+  --data-urlencode "client_secret=$CLIENT_SECRET" --silent)
 
 # Debugging: Display auth response status (remove sensitive details)
 if [[ $AUTH_RESPONSE == *"access_token"* ]]; then
-echo "Auth Response: Successfully retrieved access token"
+  echo "Auth Response: Successfully retrieved access token"
 else
-echo "Auth Response: Failed to retrieve access token"
-echo "Response: $AUTH_RESPONSE"
-exit 1
+  echo "Auth Response: Failed to retrieve access token"
+  echo "Response: $AUTH_RESPONSE"
+  exit 1
 fi
 
 # Extract access token from the response
@@ -41,28 +41,28 @@ echo "Device ID: $DEVICE_ID"
 
 # Check if DEVICE_ID was successfully retrieved
 if [ -z "$DEVICE_ID" ]; then
-echo "Failed to obtain Device ID"
-exit 1
+  echo "Failed to obtain Device ID"
+  exit 1
 fi
 
-# Add the computer to the static group
+# Remove the computer from the static group
 apiURL="JSSResource/computergroups/id/${STATIC_GROUP_ID}"
 xmlHeader="<?xml version=\"1.0\" encoding=\"UTF-8\"?>"
-apiData="<computer_group><id>${STATIC_GROUP_ID}</id><computer_additions><computer><id>${DEVICE_ID}</id></computer></computer_additions></computer_group>"
+apiData="<computer_group><id>${STATIC_GROUP_ID}</id><computer_deletions><computer><id>${DEVICE_ID}</id></computer></computer_deletions></computer_group>"
 
-ADD_COMPUTER_RESPONSE=$(curl -s \
---header "Authorization: Bearer ${ACCESS_TOKEN}" --header "Content-Type: text/xml" \
---url "${JAMF_URL}/${apiURL}" \
---data "${xmlHeader}${apiData}" \
---request PUT)
+REMOVE_COMPUTER_RESPONSE=$(curl -s \
+  --header "Authorization: Bearer ${ACCESS_TOKEN}" --header "Content-Type: text/xml" \
+  --url "${JAMF_URL}/${apiURL}" \
+  --data "${xmlHeader}${apiData}" \
+  --request PUT)
 
-# Validate if the computer was added successfully
-if echo "$ADD_COMPUTER_RESPONSE" | grep -q "<id>${STATIC_GROUP_ID}</id>"; then
-echo "Successfully added computer to static group"
+# Validate if the computer was removed successfully
+if echo "$REMOVE_COMPUTER_RESPONSE" | grep -q "<id>${STATIC_GROUP_ID}</id>"; then
+  echo "Successfully removed computer from static group"
 else
-echo "Failed to add computer to static group"
-echo "Response: $ADD_COMPUTER_RESPONSE"
-exit 1
+  echo "Failed to remove computer from static group"
+  echo "Response: $REMOVE_COMPUTER_RESPONSE"
+  exit 1
 fi
 
 exit 0
