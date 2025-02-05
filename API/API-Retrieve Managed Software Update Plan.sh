@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#/v1/managed-software-updates/plans
+
 # Define file paths
 jsonFilePath="$HOME/Downloads/AllUpdatesFinal.json"
 csvFilePath="$HOME/Downloads/DeviceUpdates.csv"
