@@ -1,9 +1,6 @@
 #!/bin/bash
 ## postflight
 ##
-## Not supported for flat packages.
-##
-## https://github.com/atlauren
 ## 2024-11-03
 
 pathToScript=$0
