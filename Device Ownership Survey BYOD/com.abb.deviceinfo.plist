@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+  <dict>
+    <key>computer_name</key>
+    <string>$COMPUTERNAME</string>
+    <key>site_name</key>
+    <string>$SITENAME</string>
+    <key>udid</key>
+    <string>$UDID</string>
+    <key>serial_number</key>
+    <string>$SERIALNUMBER</string>
+    <key>username</key>
+    <string>$EXTENSIONATTRIBUTE_194</string>
+    <key>full_name</key>
+    <string>$FULLNAME</string>
+    <key>email</key>
+    <string>$EMAIL</string>
+  </dict>
+</plist>
