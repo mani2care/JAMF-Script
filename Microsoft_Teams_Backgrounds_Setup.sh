@@ -1,10 +1,16 @@
 #!/bin/zsh
 
+# Author: Manikandan (mani2care)
+# Script Title: Microsoft Teams Background Setup
+# Script Synopsis: This script sets up a custom background for Microsoft Teams, downloading the background image if not present, 
+# and placing it in the appropriate Teams background upload folder. It includes options to clean and replace existing images 
+# based on a specified GUID or to generate a new one.
+
 # Define the static GUID for the background file
 STATIC_GUID="F0397AC7-A070-4F74-AD2C-AB4C5D962EF9"  # Leave empty to generate a new GUID
 
 # Define the download URL if image is not present
-BACKGROUND_URL=""
+BACKGROUND_URL="https://www.google.com/url?sa=i&url=https%3A%2F%2Fwww.jamf.com%2Fblog%2Fpowerautomate-flow-jamf-pro-microsoft-teams%2F&psig=AOvVaw0rxMK5sddnxUZjRgwuAWxp&ust=1744740351544000&source=images&cd=vfe&opi=89978449&ved=0CBQQjRxqFwoTCPiArMKO2IwDFQAAAAAdAAAAABAJ"
 Orgname="org"
 
 # Define the input image path
