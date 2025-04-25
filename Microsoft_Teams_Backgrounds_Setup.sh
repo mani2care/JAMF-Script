@@ -18,6 +18,8 @@ imagePath="/Users/Shared/${Orgname}_Teams_Background.png"
 
 # Get current user
 currentUser=$(/bin/ls -l /dev/console | /usr/bin/awk '{ print $3 }')
+userHome=$(dscl . -read /Users/"$currentUser" NFSHomeDirectory | awk '{print $2}')
+
 
 # Check if Microsoft Teams is installed
 if [[ ! -d "/Applications/Microsoft Teams.app" ]]; then
@@ -26,7 +28,7 @@ if [[ ! -d "/Applications/Microsoft Teams.app" ]]; then
 fi
 
 # Define Teams Upload path
-outputPath="$HOME/Library/Containers/com.microsoft.teams2/Data/Library/Application Support/Microsoft/MSTeams/Backgrounds/Uploads"
+outputPath="$userHome/Library/Containers/com.microsoft.teams2/Data/Library/Application Support/Microsoft/MSTeams/Backgrounds/Uploads"
 
 # Create output directory if it doesn't exist
 [[ ! -d "$outputPath" ]] && mkdir -p "$outputPath"
