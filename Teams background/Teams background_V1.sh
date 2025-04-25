@@ -2,7 +2,6 @@
 
 # teamsbackground.sh
 #
-# Author: Tobias Almén
 #
 # Version: 1.0
 #
