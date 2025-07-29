@@ -1,0 +1,5 @@
+#!/bin/bash
+
+appname="BBEdit"
+appidentifier="com.barebones.bbedit"
+/usr/bin/mdfind "kMDItemCFBundleIdentifier == '$appidentifier'" | grep -vE "^/Applications/$appname.app"
