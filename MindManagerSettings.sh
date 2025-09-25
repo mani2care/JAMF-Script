@@ -41,6 +41,20 @@ apply_mindmanager_24_settings() {
     su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.24 EnableCheckForProductNotifications -bool false"
 }
 
+apply_mindmanager_25_settings() {
+    echo "Applying settings for MindManager 25..."
+    rm -rf /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25.plist
+    su -l "$currentuser" -c "defaults -currentHost write com.mindjet.mindmanager.25 ShowEULA -int 0"
+    su -l "$currentuser" -c "defaults -currentHost write com.mindjet.mindmanager.25 Edition -int 0"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25 FirstLaunch -bool false"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25 DeviceAutoUpdateDisabled -bool false"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25 StartupDialogPolicy -int 3"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25 NewDocumentOnStart -int 1"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25 ShowCheckForUpdates -int 0"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25 UpdateCheck -int 86400"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25 EnableTracking -bool false"
+    su -l "$currentuser" -c "defaults write /Users/$currentuser/Library/Preferences/com.mindjet.mindmanager.25 EnableCheckForProductNotifications -bool false"
+}
 
 #---Check MindManager version from Info.plist---#
 
@@ -54,6 +68,8 @@ if [ -f "$plist_path" ]; then
         apply_mindmanager_23_settings
     elif [[ $version == 24.* ]]; then
         apply_mindmanager_24_settings
+    elif [[ $version == 25.* ]]; then
+        apply_mindmanager_25_settings
     else
         echo "Installed MindManager version is not supported."
     fi
