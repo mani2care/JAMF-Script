@@ -24,7 +24,7 @@ outputPath="$userHome/Library/Containers/com.microsoft.teams2/Data/Library/Appli
 mkdir -p "$outputPath"
 
 #clean the folder.
-rm -rf "~/Library/Containers/com.microsoft.teams2/Data/Library/Application Support/Microsoft/MSTeams/Backgrounds/Uploads/"*
+rm -rf "$outputPath/"*
 
 # 4) Base GUID for all images
 baseGUID="93E4CE45-EC48-4E25-B77B-8BB9EBC6"
