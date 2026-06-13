@@ -2,45 +2,44 @@
 ##############################################################################
 #
 # Script Name      : Gimp_Photogimp_Installer.zsh
-# Description      : Safely install for Intel and Apple Silicon Macs
+# Description      : Safely install GIMP + PhotoGIMP for Intel and Apple Silicon Macs
 #
 # Author           : Manikandan R (https://github.com/mani2care)
 # Team             : JAMF
 #
-# Version          : 1.0.0
+# Version          : 1.0.3
 # Created Date     : 2026-06-12
-# Last Modified    : 2026-06-12
+# Last Modified    : 2026-06-13
 #
 # Supported macOS  : macOS 13+
 # Run As           : Root
+#
+# What this script does:
+#   1.  Detects if GIMP is installed and what version
+#   2.  Compares installed version against latest from gimp.org
+#   3.  If GIMP is missing or outdated — downloads and installs the latest DMG
+#   4.  Creates GIMP config directories silently as the console user (no app launch, no UI)
+#   5.  Downloads the latest PhotoGIMP release from GitHub
+#   6.  Takes ONE timestamped backup of the entire GIMP config to /Users/Shared/ before touching anything
+#   7.  Removes old PhotoGIMP version folders (covered by the single backup above)
+#   8.  Installs PhotoGIMP into ~/Library/Application Support/GIMP/
+#   9.  Sets correct ownership/permissions on the GIMP config directory
+#   10. Validates everything is in place
+#   11. Prunes /Users/Shared — keeps only the 5 most recent backups per group
+#   12. Logs all activity to /private/var/log/gimp_photogimp_install.log
+#
+# Logs to: /private/var/log/gimp_photogimp_install.log
 #
 # Change History
 # ---------------------------------------------------------------------------
 # Version | Date       | Author      | Changes
 # ---------------------------------------------------------------------------
 # 1.0.0   | 2026-06-12 | Manikandan  | Initial release
+# 1.0.1   | 2026-06-13 | Manikandan  | Fix zsh NULL_GLOB for empty GIMP config dir after cleanup
+# 1.0.2   | 2026-06-13 | Manikandan  | Prune /Users/Shared — keep max 5 backups per group, remove oldest
+# 1.0.3   | 2026-06-13 | Manikandan  | Single backup per run — remove duplicate per-folder backups in remove_old_photogimp
 #
 ##############################################################################
-
-###############################################################################
-# GIMP + PhotoGIMP Installation Script
-# Run as: root (via Jamf Pro policy)
-#
-# What this script does:
-#   1. Detects if GIMP is installed and what version
-#   2. Compares installed version against latest from gimp.org
-#   3. If GIMP is missing or outdated — downloads and installs the latest DMG
-#   4. Launches GIMP headlessly once so it creates its config directories
-#   5. Downloads the latest PhotoGIMP release from GitHub
-#   6. Backs up any existing GIMP config to /Users/Shared/GIMP_backup_<timestamp>
-#   7. Removes any old PhotoGIMP version folder if present
-#   8. Installs PhotoGIMP into ~/Library/Application Support/GIMP/
-#   9. Sets correct ownership/permissions on the GIMP config directory
-#  10. Validates everything is in place
-#  11. Logs all activity to /private/var/log/gimp_photogimp_install.log
-#
-# Logs to: /private/var/log/gimp_photogimp_install.log
-###############################################################################
 
 ###############################################################################
 # Configuration
@@ -408,6 +407,9 @@ install_gimp() {
 initialize_gimp_config() {
     log "---------- Initializing GIMP Config Directories ----------"
 
+    # We create the config directory structure manually as the console user.
+    # This is intentionally silent/invisible — no app launch, no UI.
+    # GIMP will populate the rest of its defaults on first real user launch.
     local EXPECTED_CONFIG="${GIMP_CONFIG_DIR}/${LATEST_PHOTOGIMP_VERSION}"
 
     if [[ -d "$EXPECTED_CONFIG" ]]; then
@@ -415,36 +417,14 @@ initialize_gimp_config() {
         return 0
     fi
 
-    log "Launching GIMP as ${CONSOLE_USER} to create config dirs (20s timeout)..."
-
+    log "Creating GIMP config directory as ${CONSOLE_USER} (no app launch)..."
     /bin/launchctl asuser "$CONSOLE_UID" \
         /usr/bin/su - "$CONSOLE_USER" -c \
-        "open -a '${GIMP_APP}' && sleep 20 && osascript -e 'quit app \"GIMP\"'" \
-        >> "$LOG_FILE" 2>&1 &
+        "mkdir -p '${EXPECTED_CONFIG}'" \
+        >> "$LOG_FILE" 2>&1 \
+        || fail "Could not create GIMP config directory: ${EXPECTED_CONFIG}"
 
-    local LAUNCH_PID=$!
-    sleep 25
-
-    # Kill GIMP process if still running
-    /usr/bin/pkill -u "$CONSOLE_USER" -x "gimp" >> "$LOG_FILE" 2>&1 || true
-    /usr/bin/pkill -u "$CONSOLE_USER" -x "GIMP" >> "$LOG_FILE" 2>&1 || true
-    wait $LAUNCH_PID 2>/dev/null || true
-
-    # Give filesystem a moment
-    sleep 2
-
-    if [[ -d "$EXPECTED_CONFIG" ]]; then
-        log "GIMP config directory created: ${EXPECTED_CONFIG}"
-    else
-        # Create it manually if GIMP didn't make it (headless launch can fail in some MDM environments)
-        log "Config dir not created by GIMP launch. Creating manually..."
-        /bin/launchctl asuser "$CONSOLE_UID" \
-            /usr/bin/su - "$CONSOLE_USER" -c \
-            "mkdir -p '${GIMP_CONFIG_DIR}/${LATEST_PHOTOGIMP_VERSION}'" \
-            >> "$LOG_FILE" 2>&1 \
-            || fail "Could not create GIMP config directory."
-        log "Config directory created manually: ${GIMP_CONFIG_DIR}/${LATEST_PHOTOGIMP_VERSION}"
-    fi
+    log "Config directory created: ${EXPECTED_CONFIG}"
 }
 
 ###############################################################################
@@ -473,6 +453,81 @@ backup_gimp_config() {
 
     log "Backup created: ${BACKUP_DIR}"
     GIMP_BACKUP_PATH="$BACKUP_DIR"
+}
+
+###############################################################################
+# Prune Old Backups in /Users/Shared
+###############################################################################
+
+prune_shared_backups() {
+    log "---------- Pruning Old Backups in /Users/Shared ----------"
+
+    # Only one backup pattern is written per run:
+    #   GIMP_backup_<timestamp>   (from backup_gimp_config — full config snapshot)
+    #
+    # Keep only the 5 most recent. Remove anything older to save disk space.
+
+    local MAX_BACKUPS=5
+
+    # Collect all GIMP_backup_* directories in /Users/Shared
+    setopt NULL_GLOB
+    local -a ALL_BACKUP_DIRS
+    ALL_BACKUP_DIRS=( /Users/Shared/GIMP_backup_*(/) )
+    unsetopt NULL_GLOB
+
+    if [[ ${#ALL_BACKUP_DIRS[@]} -eq 0 ]]; then
+        log "No GIMP backups found in /Users/Shared. Nothing to prune."
+        return 0
+    fi
+
+    # Build a unique list of prefixes (strip trailing timestamp)
+    local -a PREFIXES
+    PREFIXES=()
+    local DIR PREFIX
+    for DIR in "${ALL_BACKUP_DIRS[@]}"; do
+        # Timestamp is always the last 15 chars: YYYYMMDD_HHMMSS
+        PREFIX="${DIR%_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9]}"
+        # Add to list only if not already present
+        local FOUND=0
+        local P
+        for P in "${PREFIXES[@]}"; do
+            [[ "$P" == "$PREFIX" ]] && FOUND=1 && break
+        done
+        [[ $FOUND -eq 0 ]] && PREFIXES+=( "$PREFIX" )
+    done
+
+    # For each prefix group, sort oldest-first and remove any beyond MAX_BACKUPS
+    for PREFIX in "${PREFIXES[@]}"; do
+        setopt NULL_GLOB
+        local -a GROUP
+        GROUP=( "${PREFIX}"_[0-9][0-9][0-9][0-9][0-9][0-9][0-9][0-9]_[0-9][0-9][0-9][0-9][0-9][0-9](/) )
+        unsetopt NULL_GLOB
+
+        local COUNT=${#GROUP[@]}
+        log "  Backup group '$(basename "$PREFIX")_*': ${COUNT} found (keeping latest ${MAX_BACKUPS})"
+
+        if [[ $COUNT -le $MAX_BACKUPS ]]; then
+            log "  Within limit — no pruning needed."
+            continue
+        fi
+
+        # Sort ascending by name (timestamp suffix makes lexical = chronological)
+        local -a SORTED
+        SORTED=( "${(@o)GROUP}" )
+
+        local REMOVE_COUNT=$(( COUNT - MAX_BACKUPS ))
+        local i=1
+        for DIR in "${SORTED[@]}"; do
+            [[ $i -gt $REMOVE_COUNT ]] && break
+            log "  Removing old backup: ${DIR}"
+            rm -rf "$DIR" >> "$LOG_FILE" 2>&1 \
+                && log "  Removed: ${DIR}" \
+                || log "  WARNING: Could not remove ${DIR}"
+            (( i++ ))
+        done
+    done
+
+    log "Backup pruning complete."
 }
 
 ###############################################################################
@@ -573,32 +628,40 @@ stage_photogimp() {
 ###############################################################################
 
 remove_old_photogimp() {
-    log "---------- Removing Old PhotoGIMP Config ----------"
+    log "---------- Removing Old PhotoGIMP Version Folders ----------"
 
-    # Remove the version config folder (e.g. 3.0/) — this is the PhotoGIMP data
-    # We already backed up everything above, so this is safe
+    # backup_gimp_config already took a full snapshot of the entire GIMP config
+    # directory before we reach this point — so no additional backups are needed
+    # here. We simply remove what needs to go.
+
+    # ── Current-version folder (same version — will be replaced by fresh install) ─
     local TARGET="${GIMP_CONFIG_DIR}/${LATEST_PHOTOGIMP_VERSION}"
-
     if [[ -d "$TARGET" ]]; then
-        log "Removing existing config folder: ${TARGET}"
-        rm -rf "$TARGET" \
-            || fail "Could not remove old PhotoGIMP config: ${TARGET}"
+        log "Removing existing ${LATEST_PHOTOGIMP_VERSION} folder (already backed up): ${TARGET}"
+        rm -rf "$TARGET" >> "$LOG_FILE" 2>&1 \
+            || fail "Could not remove ${TARGET}"
         log "Removed: ${TARGET}"
     else
-        log "No existing config folder to remove at ${TARGET}."
+        log "No existing ${LATEST_PHOTOGIMP_VERSION} folder found — nothing to remove."
     fi
 
-    # Also remove any old version folders that don't match current (e.g. 2.10)
+    # ── Older version folders (e.g. 2.10, 1.x left behind by previous installs) ─
+    # NULL_GLOB: empty glob expands to nothing instead of erroring (zsh NOMATCH).
+    setopt NULL_GLOB
     for OLD_DIR in "${GIMP_CONFIG_DIR}"/*/; do
+        [[ -d "$OLD_DIR" ]] || continue
         local DIRNAME
         DIRNAME=$(basename "$OLD_DIR")
         if [[ "$DIRNAME" != "$LATEST_PHOTOGIMP_VERSION" ]]; then
-            log "Removing outdated version folder: ${OLD_DIR}"
+            log "Removing outdated version folder (already backed up): ${OLD_DIR}"
             rm -rf "$OLD_DIR" >> "$LOG_FILE" 2>&1 \
                 && log "  Removed: ${OLD_DIR}" \
                 || log "  WARNING: Could not remove ${OLD_DIR}"
         fi
     done
+    unsetopt NULL_GLOB
+
+    log "Old version folder cleanup complete."
 }
 
 ###############################################################################
@@ -811,6 +874,7 @@ main() {
         remove_old_photogimp
         install_photogimp
         fix_permissions
+        prune_shared_backups
     fi
 
     # ── Validate ──────────────────────────────────────────────────────────────
