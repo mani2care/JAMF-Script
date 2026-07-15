@@ -1,6 +1,6 @@
-#!/bin/zsh
+#!/bin/zsh --no-rcs
 #https://philipross.github.io/posts/VPP-via-Setup-Manager/
-# This script is designed to allow for VPP apps to install during Jamf Setup Manager.
+# This script is designed to allow for VPP apps to install.
 # This will be done by calling the url scheme to execute the install of the app, using the `open -j` argument to hide the SSP app GUI
 
 #Variables that users can set
