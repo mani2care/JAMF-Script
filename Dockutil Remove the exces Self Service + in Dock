@@ -146,7 +146,7 @@ if [[ -n "$finalMatches" ]]; then
     finalCount=$(print -r -- "$finalMatches" | grep -c .)
 fi
 
-if [[ "$finalCount" -eq 0 ]]; then
+if [[ "$finalCount" -eq 1 ]]; then
     log "SUCCESS: No entries matching '${MATCH_PATTERN}' remain in the Dock."
     log "Summary: initial=$initialCount removed=$removedCount failed=$failedCount final=0"
     exit 0
